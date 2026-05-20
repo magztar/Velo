@@ -9,10 +9,39 @@ import Foundation
 import SwiftData
 
 @Model
-final class Item {
-    var timestamp: Date
-    
-    init(timestamp: Date) {
-        self.timestamp = timestamp
+final class RideActivity {
+    var startedAt: Date
+    var source: String
+
+    @Relationship(deleteRule: .cascade, inverse: \HealthMeasurementRecord.activity)
+    var measurements: [HealthMeasurementRecord]
+
+    init(startedAt: Date = .now, source: String = "HealthKit") {
+        self.startedAt = startedAt
+        self.source = source
+        self.measurements = []
+    }
+}
+
+@Model
+final class HealthMeasurementRecord {
+    var measurementType: String
+    var value: Double
+    var unit: String
+    var recordedAt: Date
+    var activity: RideActivity?
+
+    init(
+        measurementType: String,
+        value: Double,
+        unit: String,
+        recordedAt: Date = .now,
+        activity: RideActivity? = nil
+    ) {
+        self.measurementType = measurementType
+        self.value = value
+        self.unit = unit
+        self.recordedAt = recordedAt
+        self.activity = activity
     }
 }

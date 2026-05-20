@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 import SwiftUI
 
 #if canImport(HealthKit)
@@ -13,36 +14,107 @@ import HealthKit
 #endif
 
 struct ContentView: View {
-    @AppStorage("base44.receiveHealthDataURL") private var receiveHealthDataURL = ""
-    @AppStorage("base44.sessionToken") private var sessionToken = ""
-    @AppStorage("base44.activityID") private var activityID = ""
+    var body: some View {
+        TabView {
+            DashboardView()
+                .tabItem {
+                    Label("Oversikt", systemImage: "speedometer")
+                }
+
+            ActivitiesView()
+                .tabItem {
+                    Label("Aktiviteter", systemImage: "bicycle")
+                }
+
+            HealthSyncView()
+                .tabItem {
+                    Label("Health Sync", systemImage: "heart.text.square")
+                }
+        }
+    }
+}
+
+private struct DashboardView: View {
+    @Query private var activities: [RideActivity]
+    @Query private var measurements: [HealthMeasurementRecord]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Status") {
+                    StatRow(title: "Aktiviteter", value: "\(activities.count)")
+                    StatRow(title: "Matningar", value: "\(measurements.count)")
+
+                    if let last = activities.sorted(by: { $0.startedAt > $1.startedAt }).first {
+                        StatRow(
+                            title: "Senaste synk",
+                            value: last.startedAt.formatted(date: .abbreviated, time: .shortened)
+                        )
+                    }
+                }
+
+                Section("Datakalla") {
+                    Text("Appen kor helt native med lokal lagring i SwiftData och HealthKit-import.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Velo")
+        }
+    }
+}
+
+private struct ActivitiesView: View {
+    @Query(sort: \RideActivity.startedAt, order: .reverse) private var activities: [RideActivity]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if activities.isEmpty {
+                    Text("Inga aktiviteter ännu. Kor Health Sync for att importera data.")
+                        .foregroundStyle(.secondary)
+                }
+
+                ForEach(activities) { activity in
+                    Section {
+                        ForEach(activity.measurements) { measurement in
+                            HStack {
+                                Text(measurement.measurementType)
+                                Spacer()
+                                Text("\(format(measurement.value)) \(measurement.unit)")
+                                    .fontWeight(.semibold)
+                            }
+                            .font(.subheadline)
+                        }
+                    } header: {
+                        Text(activity.startedAt.formatted(date: .abbreviated, time: .shortened))
+                    }
+                }
+            }
+            .navigationTitle("Aktiviteter")
+        }
+    }
+
+    private func format(_ value: Double) -> String {
+        if value.rounded() == value {
+            return String(Int(value))
+        }
+        return String(format: "%.1f", value)
+    }
+}
+
+private struct HealthSyncView: View {
+    @Environment(\.modelContext) private var modelContext
 
     @State private var isSyncing = false
-    @State private var statusMessage = "Ingen synk körd ännu."
+    @State private var statusMessage = "Ingen synk kord an." 
 
     private let syncCoordinator = HealthDataSyncCoordinator()
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Base44") {
-                    TextField(
-                        "https://[APP_URL]/api/v1/functions/receiveHealthData",
-                        text: $receiveHealthDataURL
-                    )
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
-
-                    TextField("Session token", text: $sessionToken)
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-
-                    TextField("Activity ID", text: $activityID)
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
-                }
-
-                Section("Health Sync") {
+                Section("Import") {
                     Button {
                         Task {
                             await syncHealthData()
@@ -54,7 +126,7 @@ struct ContentView: View {
                                 Text("Synkar...")
                             }
                         } else {
-                            Label("Skicka hälsodata", systemImage: "heart.text.square")
+                            Label("Importera fran HealthKit", systemImage: "arrow.down.circle")
                         }
                     }
                     .disabled(isSyncing)
@@ -64,38 +136,18 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Velo Health Sync")
+            .navigationTitle("Health Sync")
         }
     }
 
     @MainActor
     private func syncHealthData() async {
-        guard !receiveHealthDataURL.isEmpty else {
-            statusMessage = "Ange URL till receiveHealthData-funktionen."
-            return
-        }
-
-        guard !sessionToken.isEmpty else {
-            statusMessage = "Ange en giltig sessiontoken från Base44 Auth."
-            return
-        }
-
-        guard !activityID.isEmpty else {
-            statusMessage = "Ange ett activity_id från Base44."
-            return
-        }
-
         isSyncing = true
-        statusMessage = "Hämtar HealthKit-data..."
+        statusMessage = "Laser HealthKit-data..."
 
         do {
-            let report = try await syncCoordinator.sync(
-                endpoint: receiveHealthDataURL,
-                sessionToken: sessionToken,
-                activityID: activityID
-            )
-
-            statusMessage = "Klart. Skickade \(report.sentCount) mätningar till Base44."
+            let report = try await syncCoordinator.syncIntoLocalStore(modelContext: modelContext)
+            statusMessage = "Klart. Sparade \(report.savedCount) matningar i appen."
         } catch {
             statusMessage = "Synk misslyckades: \(error.localizedDescription)"
         }
@@ -104,17 +156,17 @@ struct ContentView: View {
     }
 }
 
-private struct HealthMeasurementPayload: Encodable {
-    let activityID: String
-    let measurementType: String
-    let value: Double
-    let unit: String
+private struct StatRow: View {
+    let title: String
+    let value: String
 
-    enum CodingKeys: String, CodingKey {
-        case activityID = "activity_id"
-        case measurementType = "measurement_type"
-        case value
-        case unit
+    var body: some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Text(value)
+                .fontWeight(.semibold)
+        }
     }
 }
 
@@ -124,93 +176,47 @@ private struct HealthMeasurement {
     let unit: String
 }
 
-private struct HealthSyncReport {
-    let sentCount: Int
+private struct LocalSyncReport {
+    let savedCount: Int
 }
 
 private enum HealthSyncError: LocalizedError {
-    case invalidEndpoint
     case unsupportedPlatform
     case noMeasurementsFound
-    case invalidResponse
-    case serverError(statusCode: Int)
 
     var errorDescription: String? {
         switch self {
-        case .invalidEndpoint:
-            return "Ogiltig endpoint-URL."
         case .unsupportedPlatform:
-            return "HealthKit stöds bara på iOS/watchOS."
+            return "HealthKit stods bara pa iOS/watchOS."
         case .noMeasurementsFound:
-            return "Inga hälsomätningar hittades i HealthKit."
-        case .invalidResponse:
-            return "Fick ogiltigt svar från backend."
-        case .serverError(let statusCode):
-            return "Backend svarade med HTTP \(statusCode)."
-        }
-    }
-}
-
-private final class Base44HealthClient {
-    private let session: URLSession
-
-    init(session: URLSession = .shared) {
-        self.session = session
-    }
-
-    func send(
-        measurement: HealthMeasurement,
-        activityID: String,
-        endpoint: URL,
-        sessionToken: String
-    ) async throws {
-        let payload = HealthMeasurementPayload(
-            activityID: activityID,
-            measurementType: measurement.measurementType,
-            value: measurement.value,
-            unit: measurement.unit
-        )
-
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(sessionToken)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try JSONEncoder().encode(payload)
-
-        let (_, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw HealthSyncError.invalidResponse
-        }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw HealthSyncError.serverError(statusCode: httpResponse.statusCode)
+            return "Inga halsomatningar hittades i HealthKit."
         }
     }
 }
 
 private final class HealthDataSyncCoordinator {
-    private let client = Base44HealthClient()
-
-    func sync(endpoint: String, sessionToken: String, activityID: String) async throws -> HealthSyncReport {
-        guard let url = URL(string: endpoint) else {
-            throw HealthSyncError.invalidEndpoint
-        }
-
+    func syncIntoLocalStore(modelContext: ModelContext) async throws -> LocalSyncReport {
         let measurements = try await HealthKitReader().readMeasurements()
         guard !measurements.isEmpty else {
             throw HealthSyncError.noMeasurementsFound
         }
 
+        let activity = RideActivity(startedAt: .now, source: "HealthKit")
+        modelContext.insert(activity)
+
         for measurement in measurements {
-            try await client.send(
-                measurement: measurement,
-                activityID: activityID,
-                endpoint: url,
-                sessionToken: sessionToken
+            let record = HealthMeasurementRecord(
+                measurementType: measurement.measurementType,
+                value: measurement.value,
+                unit: measurement.unit,
+                recordedAt: .now,
+                activity: activity
             )
+            modelContext.insert(record)
         }
 
-        return HealthSyncReport(sentCount: measurements.count)
+        try modelContext.save()
+        return LocalSyncReport(savedCount: measurements.count)
     }
 }
 
@@ -294,6 +300,7 @@ private struct HealthKitReader {
         guard let type = HKObjectType.quantityType(forIdentifier: identifier) else {
             return nil
         }
+
         let sortDescriptors = [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]
 
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Double?, Error>) in
@@ -324,6 +331,7 @@ private struct HealthKitReader {
         guard let type = HKObjectType.quantityType(forIdentifier: identifier) else {
             return nil
         }
+
         let startOfDay = Calendar.current.startOfDay(for: Date())
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
 
@@ -350,4 +358,5 @@ private struct HealthKitReader {
 
 #Preview {
     ContentView()
+        .modelContainer(for: [RideActivity.self, HealthMeasurementRecord.self], inMemory: true)
 }

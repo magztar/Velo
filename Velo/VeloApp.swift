@@ -12,7 +12,8 @@ import SwiftData
 struct VeloApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            RideActivity.self,
+            HealthMeasurementRecord.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
