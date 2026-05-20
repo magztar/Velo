@@ -270,7 +270,7 @@ private struct HealthKitReader {
 
 #if canImport(HealthKit) && os(iOS)
     private func requestAuthorization(store: HKHealthStore, sampleTypes: Set<HKSampleType>) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             store.requestAuthorization(toShare: [], read: sampleTypes) { success, error in
                 if let error {
                     continuation.resume(throwing: error)
@@ -278,7 +278,7 @@ private struct HealthKitReader {
                 }
 
                 if success {
-                    continuation.resume()
+                    continuation.resume(returning: ())
                 } else {
                     continuation.resume(throwing: HealthSyncError.noMeasurementsFound)
                 }
@@ -291,10 +291,12 @@ private struct HealthKitReader {
         unit: HKUnit,
         store: HKHealthStore
     ) async throws -> Double? {
-        let type = HKQuantityType(identifier)
+        guard let type = HKObjectType.quantityType(forIdentifier: identifier) else {
+            return nil
+        }
         let sortDescriptors = [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]
 
-        return try await withCheckedThrowingContinuation { continuation in
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Double?, Error>) in
             let query = HKSampleQuery(
                 sampleType: type,
                 predicate: nil,
@@ -319,11 +321,13 @@ private struct HealthKitReader {
         unit: HKUnit,
         store: HKHealthStore
     ) async throws -> Double? {
-        let type = HKQuantityType(identifier)
+        guard let type = HKObjectType.quantityType(forIdentifier: identifier) else {
+            return nil
+        }
         let startOfDay = Calendar.current.startOfDay(for: Date())
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
 
-        return try await withCheckedThrowingContinuation { continuation in
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Double?, Error>) in
             let query = HKStatisticsQuery(
                 quantityType: type,
                 quantitySamplePredicate: predicate,
