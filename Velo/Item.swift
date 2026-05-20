@@ -27,6 +27,12 @@ final class RideActivity {
     @Relationship(deleteRule: .cascade, inverse: \HealthMeasurementRecord.activity)
     var measurements: [HealthMeasurementRecord]
 
+    @Relationship(deleteRule: .cascade, inverse: \RoutePoint.activity)
+    var routePoints: [RoutePoint]
+
+    @Relationship(deleteRule: .cascade, inverse: \ActivityPhoto.activity)
+    var photos: [ActivityPhoto]
+
     init(
         name: String = "Ny aktivitet",
         activityType: String = "cycling",
@@ -56,6 +62,8 @@ final class RideActivity {
         self.bikeName = bikeName
         self.isFavorite = isFavorite
         self.measurements = []
+        self.routePoints = []
+        self.photos = []
     }
 }
 
@@ -132,5 +140,46 @@ final class HealthSource {
         self.sourceName = sourceName
         self.isConnected = isConnected
         self.createdAt = createdAt
+    }
+}
+
+@Model
+final class RoutePoint {
+    var sequence: Int
+    var latitude: Double
+    var longitude: Double
+    var elevationM: Double?
+    var timestamp: Date?
+    var activity: RideActivity?
+
+    init(
+        sequence: Int,
+        latitude: Double,
+        longitude: Double,
+        elevationM: Double? = nil,
+        timestamp: Date? = nil,
+        activity: RideActivity? = nil
+    ) {
+        self.sequence = sequence
+        self.latitude = latitude
+        self.longitude = longitude
+        self.elevationM = elevationM
+        self.timestamp = timestamp
+        self.activity = activity
+    }
+}
+
+@Model
+final class ActivityPhoto {
+    var imagePath: String
+    var caption: String
+    var createdAt: Date
+    var activity: RideActivity?
+
+    init(imagePath: String, caption: String = "", createdAt: Date = .now, activity: RideActivity? = nil) {
+        self.imagePath = imagePath
+        self.caption = caption
+        self.createdAt = createdAt
+        self.activity = activity
     }
 }

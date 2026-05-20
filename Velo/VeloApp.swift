@@ -16,6 +16,8 @@ struct VeloApp: App {
             HealthMeasurementRecord.self,
             Bike.self,
             HealthSource.self,
+            RoutePoint.self,
+            ActivityPhoto.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
