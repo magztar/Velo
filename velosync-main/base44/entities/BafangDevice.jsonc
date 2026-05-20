@@ -1,0 +1,43 @@
+{
+  "name": "BafangDevice",
+  "type": "object",
+  "properties": {
+    "bike_id": {
+      "type": "string"
+    },
+    "device_name": {
+      "type": "string"
+    },
+    "mac_address": {
+      "type": "string"
+    },
+    "service_uuids": {
+      "type": "string",
+      "description": "Comma-separated discovered service UUIDs"
+    },
+    "manufacturer_data": {
+      "type": "string"
+    },
+    "last_connected": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "connection_status": {
+      "type": "string",
+      "enum": [
+        "connected",
+        "disconnected",
+        "pairing",
+        "error"
+      ],
+      "default": "disconnected"
+    },
+    "is_bafang": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "device_name"
+  ]
+}

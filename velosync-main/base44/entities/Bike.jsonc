@@ -1,0 +1,66 @@
+{
+  "name": "Bike",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Bike name"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Bike brand/manufacturer"
+    },
+    "model": {
+      "type": "string",
+      "description": "Bike model"
+    },
+    "bike_type": {
+      "type": "string",
+      "enum": [
+        "road",
+        "mountain",
+        "ebike",
+        "hybrid",
+        "gravel",
+        "city",
+        "other"
+      ],
+      "default": "ebike"
+    },
+    "display_type": {
+      "type": "string",
+      "description": "Display/computer type if ebike"
+    },
+    "motor_type": {
+      "type": "string",
+      "description": "Motor/controller type"
+    },
+    "bluetooth_id": {
+      "type": "string",
+      "description": "Bluetooth device ID"
+    },
+    "last_connected": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "total_distance_km": {
+      "type": "number",
+      "default": 0
+    },
+    "total_activities": {
+      "type": "number",
+      "default": 0
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Photo of the bike"
+    },
+    "is_ebike": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

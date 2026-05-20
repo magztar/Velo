@@ -1,0 +1,173 @@
+{
+  "name": "Activity",
+  "type": "object",
+  "properties": {
+    "activity_type": {
+      "type": "string",
+      "enum": [
+        "cycling",
+        "ebike",
+        "mountainbike",
+        "walking",
+        "hiking",
+        "running",
+        "car",
+        "motorcycle",
+        "boat",
+        "other"
+      ],
+      "default": "cycling",
+      "description": "Type of activity"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the activity"
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "distance_km": {
+      "type": "number"
+    },
+    "duration_minutes": {
+      "type": "number"
+    },
+    "avg_speed_kmh": {
+      "type": "number"
+    },
+    "max_speed_kmh": {
+      "type": "number"
+    },
+    "elevation_gain_m": {
+      "type": "number"
+    },
+    "calories": {
+      "type": "number"
+    },
+    "avg_heart_rate": {
+      "type": "number"
+    },
+    "max_heart_rate": {
+      "type": "number"
+    },
+    "avg_cadence": {
+      "type": "number",
+      "description": "Average cadence in RPM"
+    },
+    "max_cadence": {
+      "type": "number",
+      "description": "Max cadence in RPM"
+    },
+    "avg_power_w": {
+      "type": "number",
+      "description": "Average power in Watts"
+    },
+    "max_power_w": {
+      "type": "number",
+      "description": "Max power in Watts"
+    },
+    "note": {
+      "type": "string"
+    },
+    "is_favorite": {
+      "type": "boolean",
+      "default": false
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "gps",
+        "display",
+        "import"
+      ],
+      "default": "gps"
+    },
+    "sync_status": {
+      "type": "string",
+      "enum": [
+        "synced",
+        "pending",
+        "failed"
+      ],
+      "default": "synced"
+    },
+    "bike_id": {
+      "type": "string"
+    },
+    "bike_name": {
+      "type": "string"
+    },
+    "route_data": {
+      "type": "array",
+      "description": "Array of route points",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "elevation": {
+            "type": "number"
+          },
+          "speed": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "heart_rate": {
+            "type": "number"
+          },
+          "cadence": {
+            "type": "number"
+          },
+          "power": {
+            "type": "number"
+          },
+          "battery_level": {
+            "type": "number"
+          },
+          "assist_level": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "start_lat": {
+      "type": "number"
+    },
+    "start_lng": {
+      "type": "number"
+    },
+    "end_lat": {
+      "type": "number"
+    },
+    "end_lng": {
+      "type": "number"
+    },
+    "photo_count": {
+      "type": "number",
+      "default": 0
+    },
+    "has_health_data": {
+      "type": "boolean",
+      "default": false
+    },
+    "has_bike_data": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "activity_type",
+    "name"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "name": "HealthMeasurement",
+  "type": "object",
+  "properties": {
+    "activity_id": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "measurement_type": {
+      "type": "string",
+      "enum": [
+        "heart_rate",
+        "calories",
+        "steps",
+        "cadence",
+        "oxygen_saturation",
+        "body_temperature",
+        "speed",
+        "distance",
+        "elevation",
+        "workout_load"
+      ],
+      "description": "Type of health measurement"
+    },
+    "value": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "sync_status": {
+      "type": "string",
+      "enum": [
+        "synced",
+        "pending",
+        "failed"
+      ],
+      "default": "synced"
+    }
+  },
+  "required": [
+    "activity_id",
+    "measurement_type",
+    "value"
+  ]
+}

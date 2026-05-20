@@ -1,0 +1,52 @@
+{
+  "name": "ActivityPhoto",
+  "type": "object",
+  "properties": {
+    "activity_id": {
+      "type": "string",
+      "description": "Associated activity ID"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL to the photo file"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "URL to thumbnail"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the photo was taken"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "elevation": {
+      "type": "number"
+    },
+    "note": {
+      "type": "string",
+      "description": "Photo caption or note"
+    },
+    "sync_status": {
+      "type": "string",
+      "enum": [
+        "synced",
+        "pending",
+        "failed"
+      ],
+      "default": "synced"
+    },
+    "created_in_app": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "activity_id"
+  ]
+}

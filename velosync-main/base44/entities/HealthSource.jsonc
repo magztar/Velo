@@ -1,0 +1,52 @@
+{
+  "name": "HealthSource",
+  "type": "object",
+  "properties": {
+    "source_name": {
+      "type": "string",
+      "description": "Name of the health data source"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "apple_health",
+        "health_connect",
+        "google_fit",
+        "garmin",
+        "polar",
+        "fitbit",
+        "strava",
+        "wahoo",
+        "suunto",
+        "samsung_health",
+        "other"
+      ],
+      "description": "Platform type"
+    },
+    "is_connected": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_synced": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "permissions": {
+      "type": "string",
+      "description": "Granted permissions description"
+    },
+    "sync_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "error"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "source_name",
+    "platform"
+  ]
+}

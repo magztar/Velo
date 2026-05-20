@@ -1,0 +1,62 @@
+{
+  "name": "BafangData",
+  "type": "object",
+  "properties": {
+    "activity_id": {
+      "type": "string"
+    },
+    "bike_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_type": {
+      "type": "string",
+      "enum": [
+        "battery_level",
+        "battery_voltage",
+        "battery_current",
+        "current_speed",
+        "cadence",
+        "bike_power",
+        "gear",
+        "boost_level",
+        "total_mileage",
+        "controller_temperature",
+        "error_code",
+        "can_node_info"
+      ],
+      "description": "Type of Bafang data"
+    },
+    "value": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "raw_data": {
+      "type": "string",
+      "description": "Raw hex data if logged"
+    },
+    "interpreted": {
+      "type": "boolean",
+      "default": false
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "ble",
+        "can",
+        "api"
+      ],
+      "default": "ble"
+    }
+  },
+  "required": [
+    "activity_id",
+    "data_type",
+    "value"
+  ]
+}
