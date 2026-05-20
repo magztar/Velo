@@ -565,7 +565,16 @@ private struct ImportView: View {
             .navigationTitle("Import")
             .fileImporter(
                 isPresented: $showImporter,
-                allowedContentTypes: [.json, .xml, .commaSeparatedText, .plainText],
+                allowedContentTypes: [
+                    .json,
+                    .xml,
+                    .commaSeparatedText,
+                    .plainText,
+                    UTType(filenameExtension: "gpx")!,
+                    UTType(filenameExtension: "tcx")!,
+                    UTType(filenameExtension: "kml")!,
+                    UTType(filenameExtension: "geojson")!
+                ],
                 allowsMultipleSelection: false
             ) { result in
                 handleImportResult(result)
