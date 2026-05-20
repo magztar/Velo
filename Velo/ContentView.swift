@@ -77,7 +77,7 @@ private struct DashboardView: View {
             List {
                 Section("Summary") {
                     StatRow(title: "Activities", value: "\(activities.count)")
-                    StatRow(title: "Distance", value: "\(totalDistance, specifier: "%.1f") km")
+                    StatRow(title: "Distance", value: "\(oneDecimal(totalDistance)) km")
                     StatRow(title: "Time", value: durationText(totalDuration))
                     StatRow(title: "Calories", value: "\(Int(totalCalories)) kcal")
                 }
@@ -213,10 +213,10 @@ private struct ActivityDetailView: View {
         List {
             Section("Overview") {
                 StatRow(title: "Type", value: activity.activityType)
-                StatRow(title: "Distance", value: "\(activity.distanceKm, specifier: "%.1f") km")
+                StatRow(title: "Distance", value: "\(oneDecimal(activity.distanceKm)) km")
                 StatRow(title: "Duration", value: "\(Int(activity.durationMinutes)) min")
-                StatRow(title: "Avg speed", value: "\(activity.avgSpeedKmh, specifier: "%.1f") km/h")
-                StatRow(title: "Max speed", value: "\(activity.maxSpeedKmh, specifier: "%.1f") km/h")
+                StatRow(title: "Avg speed", value: "\(oneDecimal(activity.avgSpeedKmh)) km/h")
+                StatRow(title: "Max speed", value: "\(oneDecimal(activity.maxSpeedKmh)) km/h")
                 StatRow(title: "Elevation", value: "\(Int(activity.elevationGainM)) m")
                 StatRow(title: "Bike", value: activity.bikeName.isEmpty ? "-" : activity.bikeName)
                 Toggle("Favorite", isOn: $activity.isFavorite)
@@ -258,7 +258,7 @@ private struct ActivityDetailView: View {
                     HStack {
                         Text(measurement.measurementType)
                         Spacer()
-                        Text("\(measurement.value, specifier: "%.1f") \(measurement.unit)")
+                        Text("\(oneDecimal(measurement.value)) \(measurement.unit)")
                     }
                 }
             }
@@ -688,7 +688,7 @@ private struct ActivityRow: View {
             VStack(alignment: .leading) {
                 Text(activity.name)
                     .font(.headline)
-                Text("\(activity.activityType) | \(activity.distanceKm, specifier: "%.1f") km")
+                Text("\(activity.activityType) | \(oneDecimal(activity.distanceKm)) km")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -713,6 +713,10 @@ private struct StatRow: View {
                 .fontWeight(.semibold)
         }
     }
+}
+
+private func oneDecimal(_ value: Double) -> String {
+    value.formatted(.number.precision(.fractionLength(1)))
 }
 
 private struct PhotoTimelineView: View {
@@ -1076,7 +1080,7 @@ private enum FileActivityParser {
         return String(text[range]).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private static func iso8601Date(_ value: String) -> Date? {
+    nonisolated private static func iso8601Date(_ value: String) -> Date? {
         ISO8601DateFormatter().date(from: value)
     }
 }
